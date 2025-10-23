@@ -54,9 +54,6 @@ def create_window_train():
         "Nadam",
         "Ftrl",
         "Lion",
-        "Lamb",
-        "Loss Scale Optimizer",
-        "Muon"
     ]
 
     labelEpochs = Label(
