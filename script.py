@@ -1,4 +1,6 @@
 from NewWindow import *
+from tkinter.messagebox import showerror
+
 
 i = 0
 def start_draw(event):
@@ -20,26 +22,25 @@ def draw(event):
 def saveFile():
     global i, labelWrite
     if i <= 8:
-        pad = 2
         btn2.configure(state=NORMAL)
-        img = ImageGrab.grab(bbox=(canvas.winfo_rootx() + pad,
-                                   canvas.winfo_rooty() + pad,
-                                   canvas.winfo_rootx() + canvas.winfo_width() - pad,
-                                   canvas.winfo_rooty() + canvas.winfo_height() - pad))
+        ps = canvas.postscript(colormode='color', x=0, y=0, width=canvas.winfo_width(), height=canvas.winfo_height())
+        img = Image.open(io.BytesIO(ps.encode('utf-8')))
+        # Конвертировать изображение в RGB для дальнейших обработки
+        img = img.convert('RGB')
         img.save(f"source/mnist/{i}.png")
         i += 1
         labelWrite.configure(
             text=f'Введите цифру {i} в поле ниже, \nleft click - рисовать              right click - стереть'
         )
         canvas.delete('all')
+        canvas.create_rectangle((0, 0), (285, 285), fill="black", outline="black")
     elif i == 9:
         labelWrite.configure(
             text=f'Введите цифру {i} в поле ниже, \nleft click - рисовать              right click - стереть'
         )
-        pad = 2
-        img = ImageGrab.grab(bbox=(canvas.winfo_rootx() + pad, canvas.winfo_rooty() + pad,
-                                   canvas.winfo_rootx() + canvas.winfo_width() - pad,
-                                   canvas.winfo_rooty() + canvas.winfo_height() - pad))
+        ps = canvas.postscript(colormode='color', x=0, y=0, width=canvas.winfo_width(), height=canvas.winfo_height())
+        img = Image.open(io.BytesIO(ps.encode('utf-8')))
+        img = img.convert('RGB')
         img.save(f"source/mnist/{i}.png")
         canvas.delete('all')
         root.destroy()
@@ -69,6 +70,7 @@ labelWrite = Label(text=f'Введите цифру {i} в поле ниже, \n
 labelWrite.grid(row=0, columnspan=3)
 canvas = Canvas(root, width=280, height=280, bg="black")
 canvas.grid(row=1, columnspan=3, pady=10)
+canvas.create_rectangle((0, 0), (285, 285), fill="black", outline="black")
 
 canvas.bind("<Button-1>", start_draw)
 canvas.bind("<B1-Motion>", draw)

@@ -1,13 +1,15 @@
 from tkinter import *
 from tkinter import ttk
-from tkinter.messagebox import showinfo, askyesno, showerror
-from PIL import Image
+from tkinter.messagebox import showinfo, askyesno
 import numpy as np
-import os
 import keras
 from keras import layers
 from keras.datasets import mnist
-from PIL import ImageGrab, Image
+from PIL import Image, ImageDraw
+import os
+import io
+
+
 """
 Создание окна с выбором гиперпараметров
 """
@@ -148,7 +150,7 @@ def create_window_train():
 """
 def TrainNN(epochs, batchSize, valBatchSize, optimizer, normalization):
     (x_train, y_train), (x_test, y_test) = mnist.load_data(
-    path="C:/Users/skorpion/PyCharmMiscProject/source/mnist.npz"
+    path=str(os.getcwd()).replace("\\", "/") + "/source/mnist.npz"
 )
     my_images = []
     my_labels = []
@@ -216,11 +218,9 @@ def create_window_predict(model, train_score, test_score, normalize):
         last_x, last_y = x, y
 
     def saveFile():
-        pad = 2
-        img = ImageGrab.grab(bbox=(canvas.winfo_rootx() + pad,
-                                   canvas.winfo_rooty() + pad,
-                                   canvas.winfo_rootx() + canvas.winfo_width() - pad,
-                                   canvas.winfo_rooty() + canvas.winfo_height() - pad))
+        ps = canvas.postscript(colormode='color', x=0, y=0, width=canvas.winfo_width(), height=canvas.winfo_height())
+        img = Image.open(io.BytesIO(ps.encode('utf-8')))
+        img = img.convert('RGB')
         img.save("source/pred.png")
         img = Image.open("source/pred.png").convert("L")
         img = img.resize((28, 28))
@@ -230,34 +230,36 @@ def create_window_predict(model, train_score, test_score, normalize):
             arr = np.array(img).reshape(28, 28, 1)
         arr = np.expand_dims(arr, axis=0)
         pred = model.predict(arr)
+        labelPred = Label(FWindow, text=f"Предсказанная цифра - {pred.argmax()}", font=("Times New Roman", 14), bg='white', fg='black')
+        labelPred.grid(row=3, columnspan=3, pady=2, padx=5)
         labelTrA = Label(FWindow, text=f"Train accuracy score: {train_score[1]:.3f}", font=("Times New Roman", 14), bg='white', fg='black')
-        labelTrA.grid(row=3, column=0, sticky="w", pady=2, padx=5)
+        labelTrA.grid(row=4, column=0, sticky="w", pady=2, padx=5)
         labelTrL = Label(FWindow, text=f"Train loss score: {train_score[0]:.3f}", font=("Times New Roman", 14), bg='white', fg='black')
-        labelTrL.grid(row=3, column=2, sticky="e", pady=2, padx=5)
+        labelTrL.grid(row=4, column=2, sticky="e", pady=2, padx=5)
         labelTA = Label(FWindow, text=f"Test accuracy score: {test_score[1]:.3f}", font=("Times New Roman", 14), bg='white', fg='black')
-        labelTA.grid(row=4, column=0, sticky="w", pady=2, padx=5)
+        labelTA.grid(row=5, column=0, sticky="w", pady=2, padx=5)
         labelTL = Label(FWindow, text=f"Test loss score: {test_score[0]:.3f}", font=("Times New Roman", 14), bg='white', fg='black')
-        labelTL.grid(row=4, column=2, sticky="e", pady=2, padx=5)
+        labelTL.grid(row=5, column=2, sticky="e", pady=2, padx=5)
         label0 = Label(FWindow, text=f"0: {pred[0][0]:.2f}%", font=("Times New Roman", 14), bg='white', fg='black')
-        label0.grid(row=5, column=0, sticky="w", pady=2, padx=5)
+        label0.grid(row=6, column=0, sticky="w", pady=2, padx=5)
         label1 = Label(FWindow, text=f"1: {pred[0][1]:.2f}%", font=("Times New Roman", 14), bg='white', fg='black')
-        label1.grid(row=5, column=1, pady=2, padx=5)
+        label1.grid(row=6, column=1, pady=2, padx=5)
         label2 = Label(FWindow, text=f"2: {pred[0][2]:.2f}%", font=("Times New Roman", 14), bg='white', fg='black')
-        label2.grid(row=5, column=2, sticky="e", pady=2, padx=5)
+        label2.grid(row=6, column=2, sticky="e", pady=2, padx=5)
         label3 = Label(FWindow, text=f"3: {pred[0][3]:.2f}%", font=("Times New Roman", 14), bg='white', fg='black')
-        label3.grid(row=6, column=0, sticky="w", pady=2, padx=5)
+        label3.grid(row=7, column=0, sticky="w", pady=2, padx=5)
         label4 = Label(FWindow, text=f"4: {pred[0][4]:.2f}%", font=("Times New Roman", 14), bg='white', fg='black')
-        label4.grid(row=6, column=1, pady=2, padx=5)
+        label4.grid(row=7, column=1, pady=2, padx=5)
         label5 = Label(FWindow, text=f"5: {pred[0][5]:.2f}%", font=("Times New Roman", 14), bg='white', fg='black')
-        label5.grid(row=6, column=2, sticky="e", pady=2, padx=5)
+        label5.grid(row=7, column=2, sticky="e", pady=2, padx=5)
         label6 = Label(FWindow, text=f"6: {pred[0][6]:.2f}%", font=("Times New Roman", 14), bg='white', fg='black')
-        label6.grid(row=7, column=0, sticky="w", pady=2, padx=5)
+        label6.grid(row=8, column=0, sticky="w", pady=2, padx=5)
         label7 = Label(FWindow, text=f"7: {pred[0][7]:.2f}%", font=("Times New Roman", 14), bg='white', fg='black')
-        label7.grid(row=7, column=1, pady=2, padx=5)
+        label7.grid(row=8, column=1, pady=2, padx=5)
         label8 = Label(FWindow, text=f"8: {pred[0][8]:.2f}%", font=("Times New Roman", 14), bg='white', fg='black')
-        label8.grid(row=7, column=2, sticky="e", pady=2, padx=5)
+        label8.grid(row=8, column=2, sticky="e", pady=2, padx=5)
         label9 = Label(FWindow, text=f"9: {pred[0][9]:.2f}%", font=("Times New Roman", 14), bg='white', fg='black')
-        label9.grid(row=8, column=1, pady=2, padx=5)
+        label9.grid(row=9, column=1, pady=2, padx=5)
 
     FWindow = Tk()
     FWindow.title("Нейро-создатель MNIST")
@@ -272,6 +274,7 @@ def create_window_predict(model, train_score, test_score, normalize):
     labelWrite.grid(row=0, columnspan=3, ipadx=5, pady=10)
     canvas = Canvas(FWindow, width=280, height=280, bg="black")
     canvas.grid(row=1, columnspan=3, pady=10)
+    canvas.create_rectangle(0, 0, 280, 280, fill="black")
 
     canvas.bind("<Button-1>", start_draw)
     canvas.bind("<B1-Motion>", draw)
